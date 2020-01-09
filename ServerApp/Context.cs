@@ -14,7 +14,7 @@ namespace ServerApp
         public DbSet<User> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=A-104-14;Database=ServerDb;Trusted_Connetion=true;");
+            optionsBuilder.UseSqlServer("Server=A-104-14;Database=ServerDb;Trusted_Connection=true;");
         }
     }
 }

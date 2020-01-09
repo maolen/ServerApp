@@ -31,35 +31,41 @@ namespace ServerApp
                         resultText += System.Text.Encoding.UTF8.GetString(buffer).TrimEnd('\0');
                     }
                     var response = JsonConvert.DeserializeObject<Response>(resultText);
-
-                    if (response.Action == GIVE)
+                    if (response.Path == "users")
                     {
-                        var data = JsonConvert.SerializeObject(context.Users.ToList());
-                        var answer = System.Text.Encoding.UTF8.GetBytes(data);
-                        stream.Write(answer, 0, answer.Length);
-                    }
-                    else if (response.Action == ADD)
-                    {
-                        var user = new User()
+                        if (response.Action == GIVE)
                         {
-                            Name = response.Value,
-                            Id = users.Count + 1
-                            
-                        };
-                        users.Add(user);
-                        context.Users.Add(user);
-                        await context.SaveChangesAsync();
+                            var data = JsonConvert.SerializeObject(context.Users.ToList());
+                            var answer = System.Text.Encoding.UTF8.GetBytes(data);
+                            stream.Write(answer, 0, answer.Length);
+                        }
+                        else if (response.Action == ADD)
+                        {
+                            var user = new User()
+                            {
+                                Name = response.Value,
+                                Id = users.Count + 1
 
-                    }
-                    else if (response.Action == UPDATE)
-                    {
+                            };
+                            users.Add(user);
+                            context.Users.Add(user);
+                            await context.SaveChangesAsync();
 
-                    }
-                    else if (response.Action == REMOVE)
-                    {
-                        await context.SaveChangesAsync();
-
-                        
+                        }
+                        else if (response.Action == UPDATE)
+                        {
+                            var user = context.Users.FirstOrDefault(x => x.Id == int.Parse(response.Value));
+                            user.Name = response.NewData;
+                            context.Update(user);
+                            await context.SaveChangesAsync();
+                        }
+                        else if (response.Action == REMOVE)
+                        {
+                            var user = context.Users.FirstOrDefault(x => x.Id == int.Parse(response.Value));
+                            user.IsDeleted = true;
+                            context.Update(user);
+                            await context.SaveChangesAsync();
+                        }
                     }
                     //users = users.Where(x => x.IsDeleted == false).ToList();
                 }
